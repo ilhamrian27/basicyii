@@ -39,25 +39,30 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
 
     $menuItems = [
         ['label' => 'Beranda', 'url' => ['/site/index']],
-        ['label' => 'Post', 'url' => ['/post/index']],
     ];
 
-    // tampilkan menu Akun hanya untuk Admin
-    if (!Yii::$app->user->isGuest && Yii::$app->user->identity->role === 'Admin') {
-        $menuItems[] = ['label' => 'Akun', 'url' => ['/account/index']];
-    }
+    if (!Yii::$app->user->isGuest) {
+        $role = Yii::$app->user->identity->role;
 
-    if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
-    } else {
+        // Post selalu muncul untuk admin & author
+        $menuItems[] = ['label' => 'Post', 'url' => ['/post/index']];
+
+        // Akun hanya untuk Admin
+        if (strtolower($role) === 'admin') {
+            $menuItems[] = ['label' => 'Akun', 'url' => ['/account/index']];
+        }
+
+        // Logout
         $menuItems[] = '<li class="nav-item">'
-            . Html::beginForm(['/site/logout'], 'post')
+            . Html::beginForm(['/site/logout'], 'post', ['class' => 'd-inline'])
             . Html::submitButton(
                 'Logout (' . Html::encode(Yii::$app->user->identity->username) . ')',
                 ['class' => 'nav-link btn btn-link logout']
             )
             . Html::endForm()
             . '</li>';
+    } else {
+        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     }
 
     echo Nav::widget([
